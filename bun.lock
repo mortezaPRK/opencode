@@ -66,6 +66,7 @@
         "@kobalte/core": "catalog:",
         "@opencode/client": "workspace:*",
         "@opencode/gui-extensions": "workspace:*",
+        "@opencode/plugin": "workspace:*",
         "@opencode/schema": "workspace:*",
         "@opencode/session-ui": "workspace:*",
         "@opencode/ui": "workspace:*",
@@ -611,6 +612,23 @@
       },
       "peerDependencies": {
         "@opencode/plugin": "^2.0.27",
+      },
+    },
+    "packages/plugins/project-sessions": {
+      "name": "@opencode/plugin-project-sessions",
+      "version": "2.0.28",
+      "devDependencies": {
+        "@opencode/client": "workspace:*",
+        "@opencode/plugin": "workspace:*",
+        "@tsconfig/bun": "1.0.9",
+        "@types/bun": "1.4.0",
+        "@typescript/native-preview": "7.0.0-dev.20251207.1",
+        "solid-js": "catalog:",
+      },
+      "peerDependencies": {
+        "@opencode/client": "^2.0.28",
+        "@opencode/plugin": "^2.0.28",
+        "solid-js": ">=1.9.0",
       },
     },
     "packages/posts": {
