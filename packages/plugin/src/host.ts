@@ -13,6 +13,8 @@ export interface Entrypoints {
   readonly tui?: string
   readonly gui?: string
   readonly rpc?: string
+  /** The GUI plugin's main-process entry, run by Desktop only when the user opts in. */
+  readonly main?: string
 }
 
 export function resolve(target: Target): Entrypoints {
@@ -41,7 +43,13 @@ export function resolve(target: Target): Entrypoints {
     }
     return undefined
   }
-  return { server: entry(["server", ""]), tui: entry(["tui"]), gui: entry(["gui"]), rpc: entry(["rpc"]) }
+  return {
+    server: entry(["server", ""]),
+    tui: entry(["tui"]),
+    gui: entry(["gui"]),
+    rpc: entry(["rpc"]),
+    main: entry(["gui/main", "gui/main.ts", "gui/main.tsx"]),
+  }
 }
 
 export function load(entrypoint: string): Promise<unknown> {

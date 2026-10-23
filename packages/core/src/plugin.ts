@@ -49,6 +49,12 @@ const layer = Layer.effect(
       if (!slot) return undefined
       return slot.plugin.gui
     })
+    const main = Effect.fn("Plugin.main")(function* (id: string) {
+      const slot = active.get(Plugin.ID.make(id))
+
+      if (!slot) return undefined
+      return slot.plugin.main
+    })
     const host = yield* PluginHost.make({ list })
     const load = Effect.fnUntraced(function* (plugin: Generation) {
       const activation: Activation = { plugin, scope: yield* Scope.fork(scope) }
@@ -260,6 +266,7 @@ const layer = Layer.effect(
       hold,
       list,
       gui,
+      main,
     })
   }),
 )

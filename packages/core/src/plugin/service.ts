@@ -11,6 +11,8 @@ export interface Interface {
   readonly list: () => Effect.Effect<Plugin.Info[]>
   /** Resolves one active plugin's configured GUI entry without exposing its server setup implementation. */
   readonly gui: (id: string) => Effect.Effect<GuiEntry | undefined>
+  /** Resolves one active plugin's main-process entry, if it has one. */
+  readonly main: (id: string) => Effect.Effect<MainEntry | undefined>
   readonly close: (exit: Exit.Exit<unknown, unknown>) => Effect.Effect<void>
   /** Wait for announced updates and activation to settle; failures remain in the inventory. */
   readonly awaitActivation: Effect.Effect<void>
@@ -27,11 +29,19 @@ export interface GuiEntry {
 
 export type Failure = Plugin.Info & { readonly state: Extract<Plugin.State, { readonly status: "failed" }> }
 
+export interface MainEntry {
+  /** Resolved `./gui/main` source, bundled for Desktop's main process. */
+  readonly entrypoint: string
+  /** JSON options configured for this plugin at the current location. */
+  readonly options: Readonly<Record<string, unknown>>
+}
+
 export type Generation = PluginDefinition & {
   readonly revision: string
   readonly source?: Plugin.Source
   readonly features?: Plugin.Features
   readonly gui?: GuiEntry
+  readonly main?: MainEntry
   /** The package provides a GUI entry but no server plugin entry. */
   readonly serverless?: true
 }

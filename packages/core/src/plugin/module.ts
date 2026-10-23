@@ -117,20 +117,25 @@ const load = Effect.fn("PluginModule.load")(function* (
       : yield* Effect.sync(() => Host.resolve(installed ?? { directory: operation.target }))
   const gui = operation.global && entrypoints.gui ? fileURLToPath(entrypoints.gui) : undefined
   if (local && gui) yield* watchGui(gui)
-  const guiRevision = gui
-    ? local
-      ? createHash("sha256")
-          .update(yield* Effect.promise(() => readFile(gui)))
-          .digest("hex")
-      : installed?.revision
-    : undefined
+  const main = operation.global && entrypoints.main ? fileURLToPath(entrypoints.main) : undefined
+  if (local && main) yield* watchGui(main)
+  const revisionOf = Effect.fnUntraced(function* (file: string | undefined) {
+    if (!file) return undefined
+    if (!local) return installed?.revision
+
+    return createHash("sha256")
+      .update(yield* Effect.promise(() => readFile(file)))
+      .digest("hex")
+  })
+  const guiRevision = yield* revisionOf(gui)
+  const mainRevision = yield* revisionOf(main)
   const entrypoint = entrypoints.server
   if (!local && options?.install === false && !entrypoint && !entrypoints.gui) return { pending: true as const }
   if (!entrypoint && entrypoints.gui) {
     return {
       id: `gui:${operation.target}`,
       ...(gui ? { features: { gui: true as const } } : {}),
-      revision: JSON.stringify([operation, installed?.revision, guiRevision]),
+      revision: JSON.stringify([operation, installed?.revision, guiRevision, mainRevision]),
       source: local
         ? { type: "local" as const, path: fileURLToPath(entrypoints.gui) }
         : {
@@ -139,6 +144,7 @@ const load = Effect.fn("PluginModule.load")(function* (
             ...(installed?.version ? { version: installed.version } : {}),
           },
       ...(gui ? { gui: { entrypoint: gui, options: operation.options } } : {}),
+      ...(main ? { main: { entrypoint: main, options: operation.options } } : {}),
       serverless: true as const,
       effect: () => Effect.void,
     } satisfies Generation
@@ -168,7 +174,8 @@ const load = Effect.fn("PluginModule.load")(function* (
       ...(entrypoints.rpc ? { rpc: true as const } : {}),
     },
     ...(gui ? { gui: { entrypoint: gui, options: operation.options } } : {}),
-    revision: JSON.stringify([operation, loaded.version, guiRevision]),
+    ...(main ? { main: { entrypoint: main, options: operation.options } } : {}),
+    revision: JSON.stringify([operation, loaded.version, guiRevision, mainRevision]),
     source: path.isAbsolute(operation.target)
       ? { type: "local" as const, path: fileURLToPath(entrypoint) }
       : {

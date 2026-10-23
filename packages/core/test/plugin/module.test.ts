@@ -97,6 +97,38 @@ it.live("admits a GUI-only package only from global plugin configuration", () =>
   }),
 )
 
+it.live("carries a global GUI plugin's main entry", () =>
+  Effect.gen(function* () {
+    const directory = yield* tmpdirScoped()
+    yield* Effect.promise(() =>
+      writeFiles(directory.path, {
+        "gui.tsx": "export default undefined",
+        "gui/main.ts": 'export default { id: "gui-main", main() {} }',
+      }),
+    )
+
+    const modules = yield* PluginModule.make()
+    const project = yield* modules.load({ type: "add", target: directory.path, options: {} })
+    if ("pending" in project || "blocked" in project || "error" in project)
+      return yield* Effect.die(new Error("Project GUI plugin was not loaded"))
+    expect(project.main).toBeUndefined()
+
+    const plugin = yield* modules.load({ type: "add", target: directory.path, options: {}, global: true })
+    if ("pending" in plugin || "blocked" in plugin || "error" in plugin)
+      return yield* Effect.die(new Error("Global GUI plugin was not loaded"))
+    expect(plugin.main).toEqual({ entrypoint: path.join(directory.path, "gui/main.ts"), options: {} })
+
+    const registry = yield* Plugin.Service
+    yield* registry.activate([plugin])
+    yield* registry.awaitActivation
+
+    expect(yield* registry.main(plugin.id)).toEqual({
+      entrypoint: path.join(directory.path, "gui/main.ts"),
+      options: {},
+    })
+  }),
+)
+
 it.live("watches creation of an external helper with missing parent directories", () =>
   Effect.gen(function* () {
     const directory = yield* tmpdirScoped()

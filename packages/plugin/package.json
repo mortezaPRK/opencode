@@ -16,6 +16,7 @@
     "./host": "./src/host.ts",
     "./runtime": "./src/runtime.ts",
     "./gui": "./src/gui/index.ts",
+    "./gui/main": "./src/gui/main.ts",
     "./tui": "./src/tui/index.ts",
     "./*": "./src/*.ts"
   },

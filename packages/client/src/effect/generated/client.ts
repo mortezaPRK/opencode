@@ -20,6 +20,8 @@ import type {
   PluginListOutput,
   PluginGuiInput,
   PluginGuiOutput,
+  PluginMainInput,
+  PluginMainOutput,
   PluginCheckInput,
   PluginCheckOutput,
   PluginUpdateInput,
@@ -371,6 +373,13 @@ const EndpointPluginGui = (raw: RawClient["server.plugin"]) => (input: PluginGui
     ),
   )
 
+const EndpointPluginMain = (raw: RawClient["server.plugin"]) => (input: PluginMainInput) =>
+  preserveEffect<PluginMainOutput>()(
+    raw["plugin.main"]({ query: { location: input["location"] }, payload: { id: input["id"] } }).pipe(
+      Effect.mapError(mapClientError),
+    ),
+  )
+
 const EndpointPluginCheck = (raw: RawClient["server.plugin"]) => (input?: PluginCheckInput) =>
   preserveEffect<PluginCheckOutput>()(
     raw["plugin.check"]({ query: { location: input?.["location"] }, payload: { target: input?.["target"] } }).pipe(
@@ -388,6 +397,7 @@ const EndpointPluginUpdate = (raw: RawClient["server.plugin"]) => (input: Plugin
 const adaptGroupPlugin = (raw: RawClient["server.plugin"]) => ({
   list: EndpointPluginList(raw),
   gui: EndpointPluginGui(raw),
+  main: EndpointPluginMain(raw),
   check: EndpointPluginCheck(raw),
   update: EndpointPluginUpdate(raw),
 })

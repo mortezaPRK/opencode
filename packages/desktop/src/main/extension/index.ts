@@ -1,14 +1,16 @@
 export * as Extensions from "./index"
 
 import { app } from "electron"
-import { Context, Effect, Layer } from "effect"
+import { Context, Effect, Layer, Schedule, type Scope } from "effect"
 import type { ExtensionEndpoint } from "../../shared/ipc-rpc/extensions"
 import { ApplicationLifecycle } from "../lifecycle"
 import { Shutdown } from "../lifecycle/shutdown"
 
 const LEVELS = { debug: "Debug", info: "Info", warn: "Warn", error: "Error" } as const
 
+import { SidecarCredentials } from "../service/sidecar-credentials"
 import { DesktopCli } from "../service/desktop-cli"
+import { startConfiguredMain } from "../plugin/configured"
 import { DesktopStorage } from "../storage"
 import { setAppQuitting } from "../windows"
 import { setExtensionAssets } from "../windows/protocol"
@@ -24,7 +26,7 @@ export interface Interface {
   /** The host when something already loaded it. */
   readonly loaded: () => ExtensionHost | undefined
   /** Loads the host and activates main extensions. Runs once the first window is up. */
-  readonly start: Effect.Effect<void>
+  readonly start: Effect.Effect<void, never, Scope.Scope>
   /** Starts state sync for a window. Before the host loads, nothing is available yet. */
   readonly subscribe: (ipc: string, window: number) => { readonly available: boolean; readonly state?: unknown }
   readonly configure: (window: number, servers: readonly ExtensionEndpoint[]) => void
@@ -69,6 +71,36 @@ export const layer = Layer.effect(
         })
     }
 
+    // Configured plugin main entries are opt-in (see `startConfiguredMain`) and run beside the
+    // built-ins once the built-in server is ready.
+    const startMain = Effect.gen(function* () {
+      // The built-in server publishes its credential once it is ready.
+      const connection = yield* Effect.gen(function* () {
+        const current = SidecarCredentials.get()
+
+        if (current?.password) return current
+
+        return yield* Effect.fail("background service is not ready")
+      }).pipe(Effect.retry({ schedule: Schedule.spaced("200 millis"), times: 600 }))
+
+      const started = yield* Effect.tryPromise(() =>
+        startConfiguredMain({
+          url: connection.url,
+          password: connection.password ?? "",
+          storage: (id) => ({
+            get: (key) => storage.state.get(`plugin.${id}`, key) ?? undefined,
+            set: (key, value) => storage.state.set(`plugin.${id}`, key, value),
+            delete: (key) => storage.state.delete(`plugin.${id}`, key),
+          }),
+          log: (level, message, data) => runFork(Effect.logWithLevel(LEVELS[level])(message, data)),
+        }),
+      )
+
+      yield* Effect.addFinalizer(() =>
+        Effect.tryPromise(() => started.stop()).pipe(Effect.catchCause(() => Effect.void)),
+      )
+    })
+
     const host = () => {
       current.loading ??= Promise.all([import("./host"), runPromise(desktopCli.resolve)]).then(([module, cli]) => {
         current.host = module.createHost({
@@ -107,9 +139,14 @@ export const layer = Layer.effect(
     return Service.of({
       host,
       loaded: () => current.host,
-      start: Effect.tryPromise(() => host().then((loaded) => loaded.start())).pipe(
-        Effect.catch((error) => Effect.logError("extensions failed to start", { error })),
-      ),
+      start: Effect.gen(function* () {
+        yield* Effect.tryPromise(() => host().then((loaded) => loaded.start())).pipe(
+          Effect.catch((error) => Effect.logError("extensions failed to start", { error })),
+        )
+        yield* startMain.pipe(
+          Effect.catch((error) => Effect.logWarning("configured plugin main entries failed", { error })),
+        )
+      }),
       subscribe(ipc, window) {
         const ids = subscriptions.get(ipc) ?? new Set()
         ids.add(window)

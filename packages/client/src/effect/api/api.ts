@@ -106,6 +106,16 @@ export type PluginGuiOutput = {
 }
 export type PluginGuiOperation<E = never> = (input: PluginGuiInput) => Effect.Effect<PluginGuiOutput, E>
 
+export type PluginMainInput = {
+  readonly location?: { readonly directory?: string | undefined } | undefined
+  readonly id: string
+}
+export type PluginMainOutput = {
+  readonly location: Location.PublicRef
+  readonly data: { readonly source: string; readonly options: { readonly [x: string]: Schema.Json } }
+}
+export type PluginMainOperation<E = never> = (input: PluginMainInput) => Effect.Effect<PluginMainOutput, E>
+
 export type PluginCheckInput = {
   readonly location?: { readonly directory?: string | undefined } | undefined
   readonly target?: string | undefined
@@ -123,6 +133,7 @@ export type PluginUpdateOperation<E = never> = (input: PluginUpdateInput) => Eff
 export interface PluginApi<E = never> {
   readonly list: PluginListOperation<E>
   readonly gui: PluginGuiOperation<E>
+  readonly main: PluginMainOperation<E>
   readonly check: PluginCheckOperation<E>
   readonly update: PluginUpdateOperation<E>
 }

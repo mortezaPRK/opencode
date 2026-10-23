@@ -14,6 +14,8 @@ import type {
   PluginListOutput,
   PluginGuiInput,
   PluginGuiOutput,
+  PluginMainInput,
+  PluginMainOutput,
   PluginCheckInput,
   PluginCheckOutput,
   PluginUpdateInput,
@@ -526,6 +528,19 @@ export function make(options: ClientOptions) {
           {
             method: "POST",
             path: `/api/plugin/gui`,
+            query: { location: input["location"] },
+            body: { id: input["id"] },
+            successStatus: 200,
+            declaredStatuses: [400, 401, 404, 503],
+            empty: false,
+          },
+          requestOptions,
+        ),
+      main: (input: PluginMainInput, requestOptions?: RequestOptions) =>
+        request<PluginMainOutput>(
+          {
+            method: "POST",
+            path: `/api/plugin/main`,
             query: { location: input["location"] },
             body: { id: input["id"] },
             successStatus: 200,

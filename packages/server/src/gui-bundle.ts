@@ -34,3 +34,13 @@ export async function buildGuiBundle(entrypoint: string) {
     ],
   })
 }
+
+/** Bundles a configured GUI plugin's main-process entry for Desktop's Electron main process. */
+export async function buildGuiMain(entrypoint: string) {
+  return Bun.build({
+    entrypoints: [entrypoint],
+    target: "node",
+    format: "cjs",
+    external: ["electron", "@opencode/plugin/gui/main"],
+  })
+}

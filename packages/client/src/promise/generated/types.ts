@@ -2984,6 +2984,16 @@ export type PluginGuiOutput = {
   data: { source: string; options: { [x: string]: JsonValue } }
 }
 
+export type PluginMainInput = {
+  readonly location?: { readonly location?: { readonly directory?: string | undefined } | undefined }["location"]
+  readonly id: { readonly id: string }["id"]
+}
+
+export type PluginMainOutput = {
+  location: LocationPublicRef
+  data: { source: string; options: { [x: string]: JsonValue } }
+}
+
 export type PluginCheckInput = {
   readonly location?: { readonly location?: { readonly directory?: string | undefined } | undefined }["location"]
   readonly target?: { readonly target?: string | undefined }["target"]

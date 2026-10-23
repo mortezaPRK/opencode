@@ -177,6 +177,32 @@ ctx.ui.menu({
 })
 ```
 
+### Main-process entries
+
+A package may also export `./gui/main` for code that must run in Desktop's main process. It is opt-in, because it runs
+with full Node access: set `OPENCODE_DESKTOP_PLUGIN_MAIN=1` before launching Desktop. Keep window code out of it.
+
+```ts title="gui/main.ts"
+import { defineMain } from "@opencode/plugin/gui/main"
+
+export default defineMain({
+  id: "launch-log",
+  main(ctx) {
+    ctx.log("info", "launched", { previous: ctx.storage.get("last") })
+    ctx.storage.set("last", new Date().toISOString())
+  },
+})
+```
+
+```json title="package.json"
+{
+  "exports": { "./gui": "./gui.tsx", "./gui/main": "./gui/main.ts" }
+}
+```
+
+`ctx` provides `id`, `options`, string `storage`, and `log`. Return a cleanup to undo anything it started; Desktop runs
+it on quit. The entry runs after the built-in local server is ready and only for plugins in global config.
+
 ## Transform Hooks
 
 Transform hooks contribute to stateful domains. The editor is synchronous,
