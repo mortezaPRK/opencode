@@ -23,6 +23,7 @@ import type { HomeProjectSelection, LocalProject } from "@/shell/state/layout"
 import { ServerConnection } from "@/runtime/server/registry"
 import { useLanguage } from "@/runtime/i18n/language"
 import { usePlatform } from "@/runtime/platform/platform"
+import { ExtensionSlot } from "@/runtime/extension/render"
 import { ServerRowMenuView, serverMenuLabels } from "@/servers/registry/row-menu"
 import { ServerHealthIndicator } from "@/servers/registry/row"
 import { type ServerHealth } from "@/runtime/server/health"
@@ -300,6 +301,19 @@ function HomeProjectsPanel(props: HomeProjectsViewProps) {
           </div>
         </Show>
       </ScrollView>
+      <Show when={!props.dropdown}>
+        <ExtensionSlot
+          at="home.sidebar"
+          input={{
+            get server() {
+              return props.selection.server
+            },
+            get directory() {
+              return props.selection.directory
+            },
+          }}
+        />
+      </Show>
       <HomeUtilityNav
         class="mb-8 mt-4 hidden shrink-0 lg:flex"
         onOpenSettings={props.onOpenSettings}

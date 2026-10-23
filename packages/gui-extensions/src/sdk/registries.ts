@@ -569,6 +569,16 @@ export interface SlotMap {
     /** The routed session; a new object when another session is routed. */
     readonly session: MountedSession
   }
+  /**
+   * The Home project sidebar, below the project list. The mobile project dropdown does not render it, and it is absent
+   * from the session route.
+   */
+  readonly "home.sidebar": {
+    /** The server Home is focused on, or undefined while it lists every server. Reactive. */
+    readonly server: string | undefined
+    /** The selected project directory, or undefined when Home selects no project. Reactive. */
+    readonly directory: string | undefined
+  }
 }
 
 /** Content for one of the host's slots, typed by `at`. */

@@ -1,6 +1,6 @@
 import { Schema } from "effect"
 import { createMemo, createResource, onCleanup } from "solid-js"
-import { Command, createKeyed, type Definition, type Setup } from "@opencode/gui-extensions/sdk"
+import { Command, createKeyed, Slot, type Definition, type Setup } from "@opencode/gui-extensions/sdk"
 import type { Context as GuiPluginContext, Definition as GuiPluginDefinition } from "@opencode/plugin/gui"
 import { useGlobal, type ServerCtx } from "@/runtime/server/runtime"
 import { ServerConnection, useServers } from "@/runtime/server/registry"
@@ -230,6 +230,12 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
             }),
           dialog: (render) =>
             context.dialogs.open((dialog) => <Dialog>{render({ close: dialog.close })}</Dialog>),
+          sidebar: (section) =>
+            context.add(Slot, {
+              at: "home.sidebar",
+              order: section.order,
+              render: (input) => section.render({ server: input.server, directory: input.directory }),
+            }),
         },
       }
 

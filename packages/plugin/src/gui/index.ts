@@ -93,6 +93,29 @@ export type Catalog = {
   readonly [locale: string]: Readonly<Record<string, string>>
 }
 
+/** A Home sidebar section contributed by a GUI plugin. */
+export interface SidebarSection {
+  /** The section id, unique within the plugin. */
+  readonly id: string
+  /** Sections render in ascending order. Defaults to 0. */
+  readonly order?: number
+  /**
+   * Renders the section once; its own reactivity updates it. Read `input.server` and `input.directory` where you use
+   * them: they change without a remount.
+   *
+   * @param input - Home's focused server and selected project directory.
+   */
+  render(input: SidebarSectionInput): JSX.Element
+}
+
+/** What a Home sidebar section receives. */
+export interface SidebarSectionInput {
+  /** The server Home is focused on, or undefined while it lists every server. Reactive. */
+  readonly server: string | undefined
+  /** The selected project directory, or undefined when Home selects no project. Reactive. */
+  readonly directory: string | undefined
+}
+
 /** The APIs available to one GUI plugin instance. */
 export interface Context {
   /** The plugin id.
@@ -141,6 +164,10 @@ export interface Context {
      * @example `ctx.ui.dialog(({ close }) => <button onClick={close}>Close</button>)`
      */
     dialog(render: (dialog: Dialog) => JSX.Element): Dialog
+    /** Adds a section to the Home project sidebar and returns a cleanup function that unregisters it. Desktop only.
+     * @example `ctx.ui.sidebar({ id: "sessions", render: () => <p>Sessions</p> })`
+     */
+    sidebar(section: SidebarSection): () => void
   }
 }
 

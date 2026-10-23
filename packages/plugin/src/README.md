@@ -109,6 +109,26 @@ the built-in local server's default location; it does not switch plugin sets as 
 GUI code from remote servers. Put GUI plugin entries in global config for consistent availability. Persist a GUI plugin's
 own state with `ctx.storage.global(key)` or `ctx.storage.globalString(key, initial)`; it is namespaced by the plugin id.
 
+### Home sidebar sections
+
+`ctx.ui.sidebar` adds a section to the Home project sidebar, below the project list. It renders on Desktop only; the
+mobile project dropdown and the session route do not show it. `server` and `directory` are reactive getters for Home's
+focused server and selected project, so read them where you use them.
+
+```tsx title="gui.tsx"
+ctx.ui.sidebar({
+  id: "recent",
+  render: ({ server, directory }) => (
+    <section>
+      <h2>Recent sessions</h2>
+      <p>
+        {server ?? "All servers"} · {directory ?? "No project selected"}
+      </p>
+    </section>
+  ),
+})
+```
+
 ## Transform Hooks
 
 Transform hooks contribute to stateful domains. The editor is synchronous,
