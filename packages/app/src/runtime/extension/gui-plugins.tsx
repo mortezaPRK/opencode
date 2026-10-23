@@ -7,6 +7,7 @@ import { ServerConnection, useServers } from "@/runtime/server/registry"
 import { usePlatform } from "@/runtime/platform/platform"
 import { useLanguage } from "@/runtime/i18n/language"
 import { showToast } from "@/shell/notifications/toast"
+import { Dialog } from "@opencode/ui/dialog"
 import { decodeGuiPlugin } from "./gui-plugin-module"
 
 type Source = { server: ServerCtx }
@@ -227,7 +228,8 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
               bind: command.bind,
               run: command.run,
             }),
-          dialog: (render) => context.dialogs.open((dialog) => render({ close: dialog.close })),
+          dialog: (render) =>
+            context.dialogs.open((dialog) => <Dialog>{render({ close: dialog.close })}</Dialog>),
         },
       }
 

@@ -28,21 +28,11 @@ export const PluginHandler = HttpApiBuilder.group(Api, "server.plugin", (handler
           ),
         )
         const built = yield* Effect.tryPromise({
-          try: () =>
-            Bun.build({
-              entrypoints: [gui.entrypoint],
-              target: "browser",
-              format: "cjs",
-              jsx: { runtime: "automatic", importSource: "solid-js" },
-              external: [
-                "@opencode/plugin/gui",
-                "solid-js",
-                "solid-js/store",
-                "solid-js/jsx-runtime",
-                "solid-js/jsx-dev-runtime",
-                "solid-js/web",
-              ],
-            }),
+          try: async () => {
+            const { buildGuiBundle } = await import("../gui-bundle")
+
+            return buildGuiBundle(gui.entrypoint)
+          },
           catch: (cause) =>
             new ServiceUnavailableError({
               message: `Failed to build GUI plugin: ${ctx.payload.id}: ${String(cause)}`,

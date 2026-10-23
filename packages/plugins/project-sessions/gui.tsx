@@ -61,32 +61,32 @@ function SessionBrowser(props: { context: Context; expanded: StringStore; close:
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
+        "flex-direction": "column",
         gap: "12px",
-        maxHeight: "70vh",
+        "max-height": "70vh",
         overflow: "auto",
         padding: "16px",
-        minWidth: "min(620px, 80vw)",
+        "min-width": "min(620px, 80vw)",
       }}
     >
-      <h2 style={{ margin: "0", fontSize: "16px" }}>{props.context.t("dialog.title")}</h2>
+      <h2 style={{ margin: "0", "font-size": "16px" }}>{props.context.t("dialog.title")}</h2>
       <Show when={!groups.loading} fallback={<p>{props.context.t("dialog.loading")}</p>}>
         <Show when={!groups.error} fallback={<p role="alert">{props.context.t("dialog.error")}</p>}>
           <Show when={(groups()?.length ?? 0) > 0} fallback={<p>{props.context.t("dialog.empty")}</p>}>
             <For each={groups()}>
               {(group) => (
-                <details open={open(group)} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <details open={open(group)} style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
                   <summary
                     onClick={(event) => {
                       event.preventDefault()
                       toggle(group)
                     }}
-                    style={{ cursor: "pointer", margin: "8px 0 2px", fontSize: "13px" }}
+                    style={{ cursor: "pointer", margin: "8px 0 2px", "font-size": "13px" }}
                   >
                     {group.project.name ?? group.project.canonical}
-                    <span style={{ fontWeight: "normal", opacity: "0.65" }}> · {group.serverName}</span>
+                    <span style={{ "font-weight": "normal", opacity: "0.65" }}> · {group.serverName}</span>
                   </summary>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingLeft: "12px" }}>
+                  <div style={{ display: "flex", "flex-direction": "column", gap: "4px", "padding-left": "12px" }}>
                     <For each={group.sessions}>
                       {(session) => (
                         <button
@@ -97,20 +97,20 @@ function SessionBrowser(props: { context: Context; expanded: StringStore; close:
                           }}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            "justify-content": "space-between",
                             gap: "16px",
                             width: "100%",
                             padding: "8px",
-                            textAlign: "left",
+                            "text-align": "left",
                             background: "transparent",
                             border: "1px solid var(--v2-border-border-base)",
-                            borderRadius: "6px",
+                            "border-radius": "6px",
                             color: "inherit",
                             cursor: "pointer",
                           }}
                         >
                           <span>{session.title || props.context.t("session.untitled")}</span>
-                          <time style={{ opacity: "0.65", whiteSpace: "nowrap" }}>
+                          <time style={{ opacity: "0.65", "white-space": "nowrap" }}>
                             {new Date(session.time.updated).toLocaleString()}
                           </time>
                         </button>
