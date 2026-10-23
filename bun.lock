@@ -564,6 +564,23 @@
         "@opencode/plugin": "^2.0.27 || ^0.0.0-dev",
       },
     },
+    "packages/plugins/project-sidebar": {
+      "name": "@opencode/plugin-project-sidebar",
+      "version": "2.1.4",
+      "devDependencies": {
+        "@opencode/client": "workspace:*",
+        "@opencode/plugin": "workspace:*",
+        "@tsconfig/bun": "catalog:",
+        "@types/bun": "catalog:",
+        "@typescript/native": "catalog:",
+        "solid-js": "catalog:",
+      },
+      "peerDependencies": {
+        "@opencode/client": "^2.1.4",
+        "@opencode/plugin": "^2.1.4",
+        "solid-js": ">=1.9.0",
+      },
+    },
     "packages/posts": {
       "name": "@opencode/posts",
       "dependencies": {
