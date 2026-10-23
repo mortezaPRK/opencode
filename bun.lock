@@ -564,6 +564,22 @@
         "@opencode/plugin": "^2.0.27 || ^0.0.0-dev",
       },
     },
+    "packages/plugins/session-badge": {
+      "name": "@opencode/plugin-session-badge",
+      "version": "2.1.4",
+      "devDependencies": {
+        "@opencode/client": "workspace:*",
+        "@opencode/plugin": "workspace:*",
+        "@tsconfig/bun": "catalog:",
+        "@types/bun": "catalog:",
+        "@typescript/native": "catalog:",
+        "solid-js": "catalog:",
+      },
+      "peerDependencies": {
+        "@opencode/plugin": "^2.1.4",
+        "solid-js": ">=1.9.0",
+      },
+    },
     "packages/posts": {
       "name": "@opencode/posts",
       "dependencies": {
