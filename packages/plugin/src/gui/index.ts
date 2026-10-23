@@ -116,6 +116,28 @@ export interface PanelInput {
   readonly session: SessionSummary
 }
 
+/** What a menu action receives when it runs. */
+export interface MenuRunInput {
+  /** The routed session, or undefined on Home and drafts. */
+  readonly session: SessionSummary | undefined
+}
+
+/** An action in the session panel's `+` menu. */
+export interface MenuAction {
+  /** The action id, unique within the plugin. */
+  readonly id: string
+  /** The menu label. */
+  readonly title: string
+  /** Actions render in ascending order. Defaults to 0. */
+  readonly order?: number
+  /**
+   * Runs when the user selects the action.
+   *
+   * @param input - The routed session at the moment of the click.
+   */
+  run(input: MenuRunInput): void
+}
+
 /** The routed session a header item renders for. */
 export interface SessionSummary {
   /** The session id on its server. */
@@ -243,6 +265,10 @@ export interface Context {
      * @example `ctx.ui.panel({ id: "details", title: "Details", render: ({ session }) => <p>{session.id}</p> })`
      */
     panel(panel: PanelItem): () => void
+    /** Adds an action to the session panel's `+` menu and returns a cleanup function that unregisters it.
+     * @example `ctx.ui.menu({ id: "inspect", title: "Inspect", run: ({ session }) => console.log(session?.id) })`
+     */
+    menu(action: MenuAction): () => void
   }
 }
 

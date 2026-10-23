@@ -1,6 +1,6 @@
 import { Schema } from "effect"
 import { createMemo, createResource, onCleanup } from "solid-js"
-import { Command, createKeyed, Panel, Slot, type Definition, type MountedSession, type PanelTab, type Setup } from "@opencode/gui-extensions/sdk"
+import { Command, createKeyed, MenuItem, Panel, Slot, type Definition, type MountedSession, type PanelTab, type Setup } from "@opencode/gui-extensions/sdk"
 import type { Context as GuiPluginContext, Definition as GuiPluginDefinition, SessionSummary } from "@opencode/plugin/gui"
 import { useGlobal, type ServerCtx } from "@/runtime/server/runtime"
 import { ServerConnection, useServers } from "@/runtime/server/registry"
@@ -280,6 +280,20 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
                 list: (input) => (input.open.includes(panel.id) ? [tab] : []),
                 render: (props) => panel.render({ session: summary(() => props.session) }),
               }
+            }),
+          menu: (action) =>
+            context.add(MenuItem, {
+              menu: "session.panel",
+              id: action.id,
+              get title() {
+                return action.title
+              },
+              order: action.order,
+              run() {
+                const session = context.sessions.current()
+
+                action.run({ session: session ? summary(() => session) : undefined })
+              },
             }),
         },
       }

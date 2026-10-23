@@ -164,6 +164,19 @@ ctx.ui.panel({
 })
 ```
 
+### Session panel menu actions
+
+`ctx.ui.menu` adds an action to the session panel's `+` menu, beside the built-in open-file and terminal actions. The
+action receives the routed session at click time, or undefined on Home and drafts.
+
+```tsx title="gui.tsx"
+ctx.ui.menu({
+  id: "inspect",
+  title: "Inspect session",
+  run: ({ session }) => ctx.ui.dialog(() => <p>{session?.id ?? "No session"}</p>),
+})
+```
+
 ## Transform Hooks
 
 Transform hooks contribute to stateful domains. The editor is synchronous,
