@@ -1,7 +1,7 @@
 import { Schema } from "effect"
 import { createMemo, createResource, onCleanup } from "solid-js"
-import { Command, createKeyed, Slot, type Definition, type Setup } from "@opencode/gui-extensions/sdk"
-import type { Context as GuiPluginContext, Definition as GuiPluginDefinition } from "@opencode/plugin/gui"
+import { Command, createKeyed, Panel, Slot, type Definition, type MountedSession, type PanelTab, type Setup } from "@opencode/gui-extensions/sdk"
+import type { Context as GuiPluginContext, Definition as GuiPluginDefinition, SessionSummary } from "@opencode/plugin/gui"
 import { useGlobal, type ServerCtx } from "@/runtime/server/runtime"
 import { ServerConnection, useServers } from "@/runtime/server/registry"
 import { usePlatform } from "@/runtime/platform/platform"
@@ -163,6 +163,22 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
         id: plugin.id,
         options,
         t: context.t,
+        panels: {
+          open(panelID) {
+            const session = context.sessions.current()
+
+            if (!session) return
+
+            context.layout.open(`${plugin.id}:${panelID}`, session)
+          },
+          close(panelID) {
+            const session = context.sessions.current()
+
+            if (!session) return
+
+            context.layout.close(`${plugin.id}:${panelID}`, session)
+          },
+        },
         storage: {
           global(key) {
             const existing = storage.get(key)
@@ -240,29 +256,30 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
             context.add(Slot, {
               at: "session.header",
               order: item.order,
-              render: (input) => {
-                const session = {
-                  get id() {
-                    return input.session.id
-                  },
-                  get serverID() {
-                    return input.session.server.id
-                  },
-                  get directory() {
-                    return input.session.directory
-                  },
-                  get project() {
-                    return input.session.listedProject?.name
-                  },
-                }
-
-                return item.render({
-                  session,
+              render: (input) =>
+                item.render({
+                  session: summary(() => input.session),
                   get active() {
                     return input.active
                   },
-                })
-              },
+                }),
+            }),
+          panel: (panel) =>
+            context.add(Panel, () => {
+              const tab: PanelTab = {
+                id: panel.id,
+                get title() {
+                  return panel.title
+                },
+                closable: "hover",
+              }
+
+              return {
+                id: panel.id,
+                region: panel.region ?? "side",
+                list: (input) => (input.open.includes(panel.id) ? [tab] : []),
+                render: (props) => panel.render({ session: summary(() => props.session) }),
+              }
             }),
         },
       }
@@ -311,4 +328,21 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
   }
 
   return null
+}
+
+function summary(session: () => MountedSession): SessionSummary {
+  return {
+    get id() {
+      return session().id
+    },
+    get serverID() {
+      return session().server.id
+    },
+    get directory() {
+      return session().directory
+    },
+    get project() {
+      return session().listedProject?.name
+    },
+  }
 }

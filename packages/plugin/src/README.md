@@ -145,6 +145,25 @@ ctx.ui.header({
 })
 ```
 
+### Session panels
+
+`ctx.ui.panel` adds a side or dock panel; `ctx.panels.open` and `ctx.panels.close` act on the routed session. A panel
+renders only while its tab is in the session strip, so open it from a command or the header.
+
+```tsx title="gui.tsx"
+ctx.ui.command({
+  id: "details",
+  title: "Session details",
+  run: () => ctx.panels.open("details"),
+})
+
+ctx.ui.panel({
+  id: "details",
+  title: "Details",
+  render: ({ session }) => <p>{session.directory}</p>,
+})
+```
+
 ## Transform Hooks
 
 Transform hooks contribute to stateful domains. The editor is synchronous,

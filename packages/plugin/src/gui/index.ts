@@ -93,6 +93,29 @@ export type Catalog = {
   readonly [locale: string]: Readonly<Record<string, string>>
 }
 
+/** A session panel contributed by a GUI plugin. */
+export interface PanelItem {
+  /** The panel id, unique within the plugin. */
+  readonly id: string
+  /** The tab title. */
+  readonly title: string
+  /** Where the panel opens. Defaults to `side`. */
+  readonly region?: "side" | "dock"
+  /**
+   * Renders the panel once; its own reactivity updates it. Read `input.session` where you use it: another routed
+   * session arrives without a remount.
+   *
+   * @param input - The routed session.
+   */
+  render(input: PanelInput): JSX.Element
+}
+
+/** What a session panel receives. */
+export interface PanelInput {
+  /** The routed session. Reactive. */
+  readonly session: SessionSummary
+}
+
 /** The routed session a header item renders for. */
 export interface SessionSummary {
   /** The session id on its server. */
@@ -187,6 +210,15 @@ export interface Context {
     /** Opens a session, creating or focusing its tab. */
     open(serverID: string, sessionID: string): void
   }
+  /** Session panels contributed by this plugin. */
+  readonly panels: {
+    /** Opens this plugin's panel on the routed session; does nothing on Home or a draft.
+     * @example `ctx.panels.open("details")`
+     */
+    open(panelID: string): void
+    /** Closes this plugin's panel on the routed session. */
+    close(panelID: string): void
+  }
   /** UI contributions.
    * @example `ctx.ui.command({ id: "open", title: "Open", run() {} })`
    */
@@ -207,6 +239,10 @@ export interface Context {
      * @example `ctx.ui.header({ id: "status", render: ({ active }) => <span>{active ? "On screen" : ""}</span> })`
      */
     header(item: HeaderItem): () => void
+    /** Adds a session panel and returns a cleanup function that unregisters it.
+     * @example `ctx.ui.panel({ id: "details", title: "Details", render: ({ session }) => <p>{session.id}</p> })`
+     */
+    panel(panel: PanelItem): () => void
   }
 }
 
