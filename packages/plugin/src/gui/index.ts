@@ -93,6 +93,41 @@ export type Catalog = {
   readonly [locale: string]: Readonly<Record<string, string>>
 }
 
+/** The routed session a header item renders for. */
+export interface SessionSummary {
+  /** The session id on its server. */
+  readonly id: string
+  /** The app's server key. */
+  readonly serverID: string
+  /** The session's workspace directory. */
+  readonly directory: string
+  /** The listed project's name, when the session belongs to one. */
+  readonly project: string | undefined
+}
+
+/** What a session header item receives. */
+export interface HeaderInput {
+  /** The routed session. Reactive. */
+  readonly session: SessionSummary
+  /** This timeline is the one on screen. Reactive. */
+  readonly active: boolean
+}
+
+/** An item contributed to the session header, beside the built-in context and details indicators. */
+export interface HeaderItem {
+  /** The item id, unique within the plugin. */
+  readonly id: string
+  /** Items render in ascending order. Defaults to 0. */
+  readonly order?: number
+  /**
+   * Renders the item once; its own reactivity updates it. Read `input.session` and `input.active` where you use them:
+   * they change without a remount.
+   *
+   * @param input - The routed session and whether its timeline is on screen.
+   */
+  render(input: HeaderInput): JSX.Element
+}
+
 /** A Home sidebar section contributed by a GUI plugin. */
 export interface SidebarSection {
   /** The section id, unique within the plugin. */
@@ -168,6 +203,10 @@ export interface Context {
      * @example `ctx.ui.sidebar({ id: "sessions", render: () => <p>Sessions</p> })`
      */
     sidebar(section: SidebarSection): () => void
+    /** Adds an item to the session header and returns a cleanup function that unregisters it.
+     * @example `ctx.ui.header({ id: "status", render: ({ active }) => <span>{active ? "On screen" : ""}</span> })`
+     */
+    header(item: HeaderItem): () => void
   }
 }
 

@@ -129,6 +129,22 @@ ctx.ui.sidebar({
 })
 ```
 
+### Session header items
+
+`ctx.ui.header` adds an item to the session header, beside the built-in context and details indicators. Use it for a
+badge or a small status control. `session` and `active` are reactive getters; `active` is false while a cached
+timeline is off screen.
+
+```tsx title="gui.tsx"
+ctx.ui.header({
+  id: "status",
+  order: 15,
+  render: ({ session, active }) => (
+    <span title={active ? "On screen" : "Cached"}>{session.project ?? session.id.slice(0, 6)}</span>
+  ),
+})
+```
+
 ## Transform Hooks
 
 Transform hooks contribute to stateful domains. The editor is synchronous,

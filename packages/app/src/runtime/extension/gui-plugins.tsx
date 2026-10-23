@@ -236,6 +236,34 @@ export function GuiPluginLoader(props: { register: (definition: Definition) => (
               order: section.order,
               render: (input) => section.render({ server: input.server, directory: input.directory }),
             }),
+          header: (item) =>
+            context.add(Slot, {
+              at: "session.header",
+              order: item.order,
+              render: (input) => {
+                const session = {
+                  get id() {
+                    return input.session.id
+                  },
+                  get serverID() {
+                    return input.session.server.id
+                  },
+                  get directory() {
+                    return input.session.directory
+                  },
+                  get project() {
+                    return input.session.listedProject?.name
+                  },
+                }
+
+                return item.render({
+                  session,
+                  get active() {
+                    return input.active
+                  },
+                })
+              },
+            }),
         },
       }
 
